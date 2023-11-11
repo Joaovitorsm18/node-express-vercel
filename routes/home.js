@@ -11,7 +11,11 @@ router.get("/", async (req, res, next) => {
 const puppeteer = require('puppeteer');
 
 (async () => {
-  const browser = await puppeteer.launch({ headless: true, defaultViewport: null, args: ['--start-maximized'] });
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null,
+    args: ['--start-maximized', '--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
 
   const url = 'https://copasaportalprd.azurewebsites.net/Copasa.Portal/Login/Index';
