@@ -8,95 +8,71 @@ router.get("/", async (req, res, next) => {
   });
 });
 
-const readline = require('readline');
+const puppeteer = require('puppeteer');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+(async () => {
+  const browser = await puppeteer.launch({ headless: false, defaultViewport: null, args: ['--start-maximized'] });
+  const page = await browser.newPage();
 
-let cpf, senha;
+  const url = 'https://copasaportalprd.azurewebsites.net/Copasa.Portal/Login/Index';
+  console.log("Digite seu CPF");
 
-rl.question('Digite o CPF: ', (cpfInput) => {
-  cpf = cpfInput;
-  rl.question('Digite a senha: ', (senhaInput) => {
-    senha = senhaInput;
+  const cpf = '15176817667';
+  const senha = '30923010';
+  if (cpf = '15176817667') {
+    consultas = ['172158354', '23126744', '111222', '222222'];
+  } else if (cpf = '022') {
+    consultas = ['1111111', '2222222']
+  } else {
+    console.log("CPF inválido")
+  }
 
-    // Agora você pode usar as variáveis `cpf` e `senha` no seu código
-    console.log('CPF:', cpf);
-    console.log('Senha:', senha);
+  try {
+    await page.goto(url);
 
-    rl.close();
-  });
-});
+    await page.type('input[id="cpfInput"]', cpf);
+    await page.type('input[id="passwordInput"]', senha);
+    await page.keyboard.press('Enter');
 
-rl.on('close', () => {
+    await page.waitForSelector('img[alt="Copasa"]');
+    await page.click('img[alt="Copasa"]');
 
-  const puppeteer = require('puppeteer');
+    await page.waitForTimeout(3000);
 
-  (async () => {
-    const browser = await puppeteer.launch({ headless: false, defaultViewport: null, args: ['--start-maximized'] });
-    const page = await browser.newPage();
+    for (const consulta of consultas) {
+      await page.goto('https://copasaportalprd.azurewebsites.net/Copasa.Portal/Services/MyAccount_ListIdentifiers');
 
-    const url = 'https://copasaportalprd.azurewebsites.net/Copasa.Portal/Login/Index';
-    console.log("Digite seu CPF");
+      await page.waitForTimeout(10000);
 
-    //const cpf = '15176817667';
-    //const senha = '30923010';
-    if (cpf = '15176817667') {
-      consultas = ['172158354', '23126744', '111222', '222222'];
-    } else if (cpf = '022') {
-      consultas = ['1111111', '2222222']
-    } else {
-      console.log("CPF inválido")
-    }
+      await page.type('input[type="search"]', consulta);
 
-    try {
-      await page.goto(url);
+      await page.waitForTimeout(1000);
 
-      await page.type('input[id="cpfInput"]', cpf);
-      await page.type('input[id="passwordInput"]', senha);
-      await page.keyboard.press('Enter');
+      await page.click('input[id="RadioID"]');
+      await page.click('button[id="btnproceed"]');
+      await page.waitForTimeout(4000);
 
-      await page.waitForSelector('img[alt="Copasa"]');
-      await page.click('img[alt="Copasa"]');
-
-      await page.waitForTimeout(3000);
-
-      for (const consulta of consultas) {
-        await page.goto('https://copasaportalprd.azurewebsites.net/Copasa.Portal/Services/MyAccount_ListIdentifiers');
-
-        await page.waitForTimeout(10000);
-
-        await page.type('input[type="search"]', consulta);
-
-        await page.waitForTimeout(1000);
-
-        await page.click('input[id="RadioID"]');
-        await page.click('button[id="btnproceed"]');
-        await page.waitForTimeout(4000);
-
-        try {
-          const elements = await page.$x('/html/body/div/main/form/div[1]/div[5]/div/div[1]/div[3]/div/table/tbody/tr/th[7]/a/span');
-          if (elements.length > 0) {
-            await elements[0].click();
-          }
-        } catch (error) {
-          console.error('Ocorreu um erro ao realizar download:', error);
+      try {
+        const elements = await page.$x('/html/body/div/main/form/div[1]/div[5]/div/div[1]/div[3]/div/table/tbody/tr/th[7]/a/span');
+        if (elements.length > 0) {
+          await elements[0].click();
         }
-
-        await page.waitForTimeout(5000);
-
-        await page.click('button[id="btnSelect"]');
-        await page.waitForTimeout(7000);
-        await page.waitForTimeout(6000);
+      } catch (error) {
+        console.error('Ocorreu um erro ao realizar download:', error);
       }
-    } catch (error) {
-      console.error('Ocorreu um erro:', error);
-    } finally {
-      await browser.close();
+
+      await page.waitForTimeout(5000);
+
+      await page.click('button[id="btnSelect"]');
+      await page.waitForTimeout(7000);
+      await page.waitForTimeout(6000);
     }
-  })();
-});
+  } catch (error) {
+    console.error('Ocorreu um erro:', error);
+  } finally {
+    await browser.close();
+  }
+})();
+
 
 module.exports = router;
