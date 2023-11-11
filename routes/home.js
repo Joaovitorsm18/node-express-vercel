@@ -8,7 +8,7 @@ router.get("/", async (req, res, next) => {
   });
 });
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 (async () => {
   const browser = await puppeteer.launch({
